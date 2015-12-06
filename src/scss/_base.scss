@@ -1,0 +1,80 @@
+//
+// Base
+// --------------------------------------------------
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: $rootFontSize;
+}
+
+body {
+    font-family: $fontEn;
+    font-size: 1.4em;
+    line-height: $lineHeight;
+    color: $fontColor;
+    position: relative;
+    transform: translate3d(0, 0, 0);
+}
+
+@supports (-webkit-font-smoothing: antialiased) {
+    body {
+        -webkit-font-smoothing: antialiased;
+    }
+}
+
+@supports (-moz-osx-font-smoothing: grayscale) {
+    body {
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+#time, #color {
+    text-align: center;
+}
+
+#board, #next, #prev {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#board {
+    height: 100vh;
+}
+
+#next, #prev {
+    position: absolute;
+    top: 50%;
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    text-align: center;
+    margin-top: -30px;
+    cursor: pointer;
+    background: rgba(0,0,0,.3);
+    transition: transform .1s ease-in-out;
+    &:hover {
+        transform:scale(1.5);
+    }
+}
+
+#prev {
+    margin-left: 30px;
+    left: 0;
+}
+
+#next {
+    margin-right: 30px;
+    right: 0;
+}
+
+#time {
+    @include rem(80);
+}
+
+#color {
+    @include rem(30);
+}
