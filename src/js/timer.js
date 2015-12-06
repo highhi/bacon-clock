@@ -21,7 +21,7 @@ export default ( timeEl, colorEl ) => {
     let totalEs = Bacon.combineAsArray( hourProp, minutesProp, secondsProp );
 
     minutesBus.plug( secondsProp );
-    hourBus.plug( hourProp );
+    hourBus.plug( minutesProp );
 
     totalEs.onValue( ( data ) => {
         let hour    = shapeTime( data[0] );
