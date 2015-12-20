@@ -53,6 +53,7 @@ gulp.task( 'build-js', function(){
         this.emit('end');
     })
     .pipe( source( 'bacon-clock.js' ) )
+    .pipe( gulp.dest( DIR_DIST_JS ) )
     .pipe( buffer() )
     .pipe( uglify() )
     .pipe( rename ({

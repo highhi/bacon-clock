@@ -1,5 +1,5 @@
 export default {
-    getById( el ) {
-        return document.getElementById( el );
-    }
+  getById( el ) {
+    return document.getElementById( el );
+  }
 }

@@ -2,16 +2,13 @@
 (function (global){
 (function() {
 var _slice = Array.prototype.slice;
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } }
-
 var Bacon = {
   toString: function () {
     return "Bacon";
   }
 };
 
-Bacon.version = '0.7.82';
+Bacon.version = '0.7.83';
 
 var Exception = (typeof global !== "undefined" && global !== null ? global : this).Error;
 var nop = function () {};
@@ -587,13 +584,13 @@ var withMethodCallSupport = function (wrapped) {
       };
       args = args.slice(1);
     }
-    return wrapped.apply(undefined, [f].concat(_toConsumableArray(args)));
+    return wrapped.apply(undefined, [f].concat(args));
   };
 };
 
 var makeFunctionArgs = function (args) {
   args = Array.prototype.slice.call(args);
-  return makeFunction_.apply(undefined, _toConsumableArray(args));
+  return makeFunction_.apply(undefined, args);
 };
 
 var partiallyApplied = function (f, applied) {
@@ -602,7 +599,7 @@ var partiallyApplied = function (f, applied) {
       args[_key3] = arguments[_key3];
     }
 
-    return f.apply(undefined, _toConsumableArray(applied.concat(args)));
+    return f.apply(undefined, applied.concat(args));
   };
 };
 
@@ -658,7 +655,7 @@ var makeFunction_ = withMethodCallSupport(function (f) {
 });
 
 var makeFunction = function (f, args) {
-  return makeFunction_.apply(undefined, [f].concat(_toConsumableArray(args)));
+  return makeFunction_.apply(undefined, [f].concat(args));
 };
 
 var convertArgsToFunction = function (obs, f, args, method) {
@@ -989,7 +986,7 @@ extend(Observable.prototype, {
 
   onValues: function (f) {
     return this.onValue(function (args) {
-      return f.apply(undefined, _toConsumableArray(args));
+      return f.apply(undefined, args);
     });
   },
 
@@ -1444,7 +1441,7 @@ Bacon.when = function () {
                     return result;
                   })();
 
-                  return (_p = p).f.apply(_p, _toConsumableArray(values));
+                  return (_p = p).f.apply(_p, values);
                 }));
                 if (triggers.length) {
                   triggers = _.filter(nonFlattened, triggers);
@@ -1803,9 +1800,9 @@ Bacon.combineWith = function () {
   var streams = _argumentsToObservablesAndFunction[0];
   var f = _argumentsToObservablesAndFunction[1];
 
-  var desc = new Bacon.Desc(Bacon, "combineWith", [f].concat(_toConsumableArray(streams)));
+  var desc = new Bacon.Desc(Bacon, "combineWith", [f].concat(streams));
   return withDesc(desc, Bacon.combineAsArray(streams).map(function (values) {
-    return f.apply(undefined, _toConsumableArray(values));
+    return f.apply(undefined, values);
   }));
 };
 
@@ -2286,7 +2283,7 @@ Bacon.Bus = Bus;
 var liftCallback = function (desc, wrapped) {
   return withMethodCallSupport(function (f) {
     var stream = partiallyApplied(wrapped, [function (values, callback) {
-      return f.apply(undefined, _toConsumableArray(values).concat([callback]));
+      return f.apply(undefined, values.concat([callback]));
     }]);
 
     for (var _len13 = arguments.length, args = Array(_len13 > 1 ? _len13 - 1 : 0), _key13 = 1; _key13 < _len13; _key13++) {
@@ -3324,7 +3321,7 @@ Bacon.update = function (initial) {
       }
 
       return function (i) {
-        return f.apply(undefined, _toConsumableArray([i].concat(args)));
+        return f.apply(undefined, [i].concat(args));
       };
     };
   }
@@ -3400,7 +3397,7 @@ if (typeof define !== "undefined" && define !== null && define.amd != null) {
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
-    value: true
+  value: true
 });
 
 var _baconjs = require('baconjs');
@@ -3408,39 +3405,46 @@ var _baconjs = require('baconjs');
 var STRAGE_NAME = 'baconClockFont';
 
 exports['default'] = function () {
-    var fonts = ['Roboto Mono', 'Source Code Pro', 'Cousine'];
+  var fonts = arguments.length <= 0 || arguments[0] === undefined ? ['Arial'] : arguments[0];
 
-    var nextBus = new _baconjs.Bacon.Bus();
-    var prevBus = new _baconjs.Bacon.Bus();
-    var hashBus = new _baconjs.Bacon.Bus();
+  var nextBus = new _baconjs.Bacon.Bus();
+  var prevBus = new _baconjs.Bacon.Bus();
+  var hashBus = new _baconjs.Bacon.Bus();
 
-    var hashProp = hashBus.map(loopOfNumber(fonts.length)).toProperty(localStorage.getItem(STRAGE_NAME) | 0 || 0);
+  var hashProp = hashBus.map(loopOfNumber(fonts.length)).toProperty(localStorage.getItem(STRAGE_NAME) | 0 || 0);
 
-    var nextEs = hashProp.sampledBy(nextBus).map(function (val) {
-        return val + 1;
-    });
-    var prevtEs = hashProp.sampledBy(prevBus).map(function (val) {
-        return val - 1;
-    });
+  var nextEs = hashProp.sampledBy(nextBus).map(function (val) {
+    return val + 1;
+  });
+  var prevEs = hashProp.sampledBy(prevBus).map(function (val) {
+    return val - 1;
+  });
 
-    hashBus.plug(nextEs.merge(prevtEs));
+  hashBus.plug(nextEs.merge(prevEs));
 
-    hashProp.onValue(function (number) {
-        location.hash = number + 1;
-        localStorage.setItem(STRAGE_NAME, number);
-        document.body.style.fontFamily = fonts[number];
-    });
+  hashProp.onValue(function (number) {
+    location.hash = number + 1;
+    localStorage.setItem(STRAGE_NAME, number);
+    document.body.style.fontFamily = fonts[number];
+  });
 
-    return {
-        nextBus: nextBus,
-        prevBus: prevBus
-    };
+  return {
+    nextBus: nextBus,
+    prevBus: prevBus,
+    hashProp: hashProp
+  };
 };
 
 function loopOfNumber(length) {
-    return function (number) {
-        return number >= length ? 0 : number < 0 ? length - 1 : number;
-    };
+  return function (number) {
+    var result = number;
+    if (number >= length) {
+      result = 0;
+    } else if (number < 0) {
+      result = length - 1;
+    }
+    return result;
+  };
 }
 module.exports = exports['default'];
 
@@ -3451,9 +3455,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 var _baconjs = require('baconjs');
 
-var _fonts = require('./fonts');
+var _font = require('./font');
 
-var _fonts2 = _interopRequireDefault(_fonts);
+var _font2 = _interopRequireDefault(_font);
 
 var _timer = require('./timer');
 
@@ -3468,91 +3472,103 @@ var IDENT_COLOR = 'color';
 var IDENT_BOARD = 'board';
 var IDENT_NEXT = 'next';
 var IDENT_PREV = 'prev';
+
 var ICON_ARROW_LEFT = 'fa fa-chevron-left';
 var ICON_ARROW_RIGHT = 'fa fa-chevron-right';
 
-var body = document.body;
+var FONTS = ['"Roboto Mono"', '"Source Code Pro"', '"Cousine"'];
 
-body.insertAdjacentHTML('beforeend', '\n    <div id="' + IDENT_BOARD + '">\n        <div id="' + IDENT_TIME + '"></div>\n        <div id="' + IDENT_COLOR + '"></div>\n    </div>\n    <div id="' + IDENT_NEXT + '"><i class="' + ICON_ARROW_RIGHT + '"></i></div>\n    <div id="' + IDENT_PREV + '"><i class="' + ICON_ARROW_LEFT + '"></i></div>\n');
+document.body.insertAdjacentHTML('beforeend', '\n  <div id="' + IDENT_BOARD + '">\n    <div id="' + IDENT_TIME + '"></div>\n    <div id="' + IDENT_COLOR + '"></div>\n  </div>\n  <div id="' + IDENT_NEXT + '"><i class="' + ICON_ARROW_RIGHT + '"></i></div>\n  <div id="' + IDENT_PREV + '"><i class="' + ICON_ARROW_LEFT + '"></i></div>\n');
 
 (0, _timer2['default'])(_util2['default'].getById(IDENT_TIME), _util2['default'].getById(IDENT_COLOR));
 
-var fonts = (0, _fonts2['default'])();
-fonts.prevBus.plug(_baconjs.Bacon.fromEvent(_util2['default'].getById(IDENT_PREV), 'click'));
-fonts.nextBus.plug(_baconjs.Bacon.fromEvent(_util2['default'].getById(IDENT_NEXT), 'click'));
+var fontControl = (0, _font2['default'])(FONTS);
+fontControl.prevBus.plug(_baconjs.Bacon.fromEvent(_util2['default'].getById(IDENT_PREV), 'click'));
+fontControl.nextBus.plug(_baconjs.Bacon.fromEvent(_util2['default'].getById(IDENT_NEXT), 'click'));
 
-},{"./fonts":2,"./timer":4,"./util":5,"baconjs":1}],4:[function(require,module,exports){
+},{"./font":2,"./timer":4,"./util":5,"baconjs":1}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
-    value: true
+  value: true
 });
+
+var _slicedToArray = (function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } }; })();
 
 var _baconjs = require('baconjs');
 
 exports['default'] = function (timeEl, colorEl) {
-    var date = new Date();
-    var hour = date.getHours();
-    var minutes = date.getMinutes();
-    var seconds = date.getSeconds();
+  var date = arguments.length <= 2 || arguments[2] === undefined ? new Date() : arguments[2];
 
-    var hourBus = new _baconjs.Bacon.Bus();
-    var minutesBus = new _baconjs.Bacon.Bus();
+  var hour = date.getHours();
+  var minutes = date.getMinutes();
+  var seconds = date.getSeconds();
 
-    var secondsProp = _baconjs.Bacon.interval(1000, 1).scan(seconds, countNumberOfSeconds);
-    var minutesProp = secondsProp.sampledBy(minutesBus).filter(carry).scan(minutes, countNumberOfMinutes);
-    var hourProp = minutesProp.sampledBy(hourBus).filter(carry).scan(hour, countNumberOfHour);
-    var totalEs = _baconjs.Bacon.combineAsArray(hourProp, minutesProp, secondsProp);
+  var hourBus = new _baconjs.Bacon.Bus();
+  var minutesBus = new _baconjs.Bacon.Bus();
 
-    minutesBus.plug(secondsProp);
-    hourBus.plug(hourProp);
+  var secondsProp = _baconjs.Bacon.interval(1000, 1).scan(seconds, countNumberOfSeconds);
+  var minutesProp = secondsProp.sampledBy(minutesBus).filter(carry).scan(minutes, countNumberOfMinutes);
+  var hourProp = minutesProp.sampledBy(hourBus).filter(carry).scan(hour, countNumberOfHour);
+  var totalEs = _baconjs.Bacon.combineAsArray(hourProp, minutesProp, secondsProp).map(shapeNumbers);
 
-    totalEs.onValue(function (data) {
-        var hour = shapeTime(data[0]);
-        var minutes = shapeTime(data[1]);
-        var seconds = shapeTime(data[2]);
+  minutesBus.plug(secondsProp);
+  hourBus.plug(minutesProp);
 
-        timeEl.textContent = hour + ':' + minutes + ':' + seconds;
-        colorEl.textContent = '#' + hour + minutes + seconds;
-        document.body.style.backgroundColor = '#' + hour + minutes + seconds;
-    });
+  totalEs.onValue(function (data) {
+    var _data = _slicedToArray(data, 3);
+
+    var hour = _data[0];
+    var minutes = _data[1];
+    var seconds = _data[2];
+
+    timeEl.textContent = hour + ':' + minutes + ':' + seconds;
+    colorEl.textContent = '#' + hour + minutes + seconds;
+    document.body.style.backgroundColor = '#' + hour + minutes + seconds;
+  });
+
+  return {
+    totalEs: totalEs
+  };
 };
 
 function countNumberOfSeconds(current, number) {
-    var total = current + number;
-    return total >= 60 ? 0 : total;
+  var total = current + number;
+  return total >= 60 ? 0 : total;
 }
 
 function countNumberOfMinutes(current) {
-    var total = current + 1;
-    return total >= 60 ? 0 : total;
+  var total = current + 1;
+  return total >= 60 ? 0 : total;
 }
 
 function countNumberOfHour(current) {
-    var total = current + 1;
-    return total >= 24 ? 0 : total;
+  var total = current + 1;
+  return total >= 24 ? 0 : total;
 }
 
 function carry(number) {
-    return number === 0;
+  return number === 0;
 }
 
-function shapeTime(time) {
-    return ('0' + time).slice(-2);
+function shapeNumbers(numbers) {
+  return numbers.map(function (number) {
+    return ('0' + number).slice(-2);
+  });
 }
 module.exports = exports['default'];
 
 },{"baconjs":1}],5:[function(require,module,exports){
-'use strict';
+"use strict";
 
-Object.defineProperty(exports, '__esModule', {
-    value: true
+Object.defineProperty(exports, "__esModule", {
+  value: true
 });
-exports['default'] = {
-    getById: function getById(el) {
-        return document.getElementById(el);
-    }
+exports["default"] = {
+  getById: function getById(el) {
+    return document.getElementById(el);
+  }
 };
-module.exports = exports['default'];
+module.exports = exports["default"];
 
 },{}]},{},[3]);

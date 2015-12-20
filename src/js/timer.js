@@ -1,59 +1,61 @@
 import {Bacon} from 'baconjs';
 
-export default ( timeEl, colorEl ) => {
-    let date    = new Date();
-    let hour    = date.getHours();
-    let minutes = date.getMinutes();
-    let seconds = date.getSeconds();
+export default ( timeEl, colorEl, date = new Date() ) => {
+  const hour    = date.getHours();
+  const minutes = date.getMinutes();
+  const seconds = date.getSeconds();
 
-    let hourBus = new Bacon.Bus;
-    let minutesBus = new Bacon.Bus;
+  const hourBus    = new Bacon.Bus;
+  const minutesBus = new Bacon.Bus;
 
-    let secondsProp = Bacon.interval( 1000, 1 ).scan( seconds, countNumberOfSeconds );
-    let minutesProp = secondsProp
-        .sampledBy( minutesBus )
-        .filter( carry )
-        .scan( minutes, countNumberOfMinutes );
-    let hourProp = minutesProp
-        .sampledBy( hourBus )
-        .filter( carry )
-        .scan( hour, countNumberOfHour );
-    let totalEs = Bacon.combineAsArray( hourProp, minutesProp, secondsProp );
+  const secondsProp = Bacon.interval( 1000, 1 ).scan( seconds, countNumberOfSeconds );
+  const minutesProp = secondsProp
+    .sampledBy( minutesBus )
+    .filter( carry )
+    .scan( minutes, countNumberOfMinutes );
+  const hourProp = minutesProp
+    .sampledBy( hourBus )
+    .filter( carry )
+    .scan( hour, countNumberOfHour );
+  const totalEs = Bacon.combineAsArray( hourProp, minutesProp, secondsProp ).map( shapeNumbers );
 
-    minutesBus.plug( secondsProp );
-    hourBus.plug( minutesProp );
+  minutesBus.plug( secondsProp );
+  hourBus.plug( minutesProp );
 
-    totalEs.onValue( ( data ) => {
-        let hour    = shapeTime( data[0] );
-        let minutes = shapeTime( data[1] );
-        let seconds = shapeTime( data[2] );
+  totalEs.onValue( ( data ) => {
+    const [ hour, minutes, seconds ] = data;
 
-        timeEl.textContent = `${ hour }:${ minutes }:${ seconds }`;
-        colorEl.textContent = `#${ hour }${ minutes }${ seconds }`;
-        document.body.style.backgroundColor = `#${ hour }${ minutes }${ seconds }`;
-    });
+    timeEl.textContent  = `${ hour }:${ minutes }:${ seconds }`;
+    colorEl.textContent = `#${ hour }${ minutes }${ seconds }`;
+    document.body.style.backgroundColor = `#${ hour }${ minutes }${ seconds }`;
+  });
 
+  return {
+    totalEs : totalEs
+  };
 }
 
 function countNumberOfSeconds( current, number ) {
-    let total = current + number;
-    return total >= 60 ? 0 : total;
+  const total = current + number;
+  return total >= 60 ? 0 : total;
 }
 
 function countNumberOfMinutes( current ) {
-    let total = current + 1;
-    return total >= 60 ? 0 : total;
+  const total = current + 1;
+  return total >= 60 ? 0 : total;
 }
 
 function countNumberOfHour( current ) {
-    let total = current + 1;
-    return total >= 24 ? 0 : total;
+  const total = current + 1;
+  return total >= 24 ? 0 : total;
 }
 
 function carry( number ) {
-    return number === 0;
+  return number === 0;
 }
 
-function shapeTime( time ) {
-    return ( ( '0' + time ).slice( -2 ) );
+function shapeNumbers( numbers ) {
+  return numbers.map( number => {
+    return ( '0' + number ).slice( -2 );
+  }); 
 }
